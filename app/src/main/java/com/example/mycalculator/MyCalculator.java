@@ -6,7 +6,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 public class MyCalculator extends AppCompatActivity {
     private EditText number1EditText, number2EditText;
@@ -36,177 +35,40 @@ public class MyCalculator extends AppCompatActivity {
     }
 
     private void setupButtonListeners() {
-        addButton.setOnClickListener(v -> {
-            if (validateInputs()) calculate("+");
-        });
-        subtractButton.setOnClickListener(v -> {
-            if (validateInputs()) calculate("-");
-        });
-        multiplyButton.setOnClickListener(v -> {
-            if (validateInputs()) calculate("*");
-        });
-        divideButton.setOnClickListener(v -> {
-            if (validateInputs()) calculate("/");
-        });
+        addButton.setOnClickListener(v -> calculate("+"));
+        subtractButton.setOnClickListener(v -> calculate("-"));
+        multiplyButton.setOnClickListener(v -> calculate("*"));
+        divideButton.setOnClickListener(v -> calculate("/"));
     }
 
     private void calculate(String operator) {
-        try {
-            // Get input values with better validation
-            String input1 = number1EditText.getText().toString().trim();
-            String input2 = number2EditText.getText().toString().trim();
+        int number1 = parseInt(number1EditText.getText().toString());
+        int number2 = parseInt(number2EditText.getText().toString());
+        int result = 0;
 
-            // Validate inputs are not empty
-            if (input1.isEmpty() || input2.isEmpty()) {
-                showError("Please enter both numbers");
-                return;
-            }
-
-            // Parse to double for better precision
-            double number1 = parseDouble(input1);
-            double number2 = parseDouble(input2);
-            double result = 0;
-
-            // Perform calculation
-            switch (operator) {
-                case "+":
-                    result = number1 + number2;
-                    break;
-                case "-":
-                    result = number1 - number2;
-                    break;
-                case "*":
-                    result = number1 * number2;
-                    break;
-                case "/":
-                    if (number2 == 0) {
-                        showError("Cannot divide by zero");
-                        return;
-                    }
+        switch (operator) {
+            case "+":
+                result = number1 + number2;
+                break;
+            case "-":
+                result = number1 - number2;
+                break;
+            case "*":
+                result = number1 * number2;
+                break;
+            case "/":
+                if (number2 != 0) {
                     result = number1 / number2;
-                    break;
-                default:
-                    showError("Invalid operator");
+                } else {
+                    resultTextView.setText("Error: Division by zero");
                     return;
-            }
-
-            // Format and display result
-            String formattedResult = formatResult(result);
-            showResult("Result: " + formattedResult);
-
-            // Add animation for result
-            animateResult();
-
-        } catch (NumberFormatException e) {
-            showError("Invalid number format");
-        } catch (ArithmeticException e) {
-            showError("Math error occurred");
-        } catch (Exception e) {
-            showError("Something went wrong");
-        }
-    }
-
-    // Enhanced parsing method with better error handling
-    private double parseDouble(String str) throws NumberFormatException {
-        if (str == null || str.trim().isEmpty()) {
-            throw new NumberFormatException("Empty input");
+                }
+                break;
         }
 
-        // Handle common input variations
-        str = str.trim().replace(",", ""); // Remove commas
-
-        return Double.parseDouble(str);
+        resultTextView.setText("Result: " + result);
     }
 
-    // Smart result formatting
-    private String formatResult(double result) {
-        // Check if result is effectively an integer
-        if (result == Math.floor(result) && !Double.isInfinite(result)) {
-            // For very large integers, use scientific notation
-            if (Math.abs(result) >= 1000000000) {
-                return String.format("%.2e", result);
-            }
-            return String.format("%.0f", result);
-        } else {
-            // For decimals, limit to reasonable precision
-            if (Math.abs(result) >= 1000000) {
-                // Scientific notation for very large numbers
-                return String.format("%.2e", result);
-            } else if (Math.abs(result) < 0.001 && result != 0) {
-                // Scientific notation for very small numbers
-                return String.format("%.2e", result);
-            } else {
-                // Regular decimal format, remove trailing zeros
-                String formatted = String.format("%.6f", result);
-                formatted = formatted.replaceAll("0+$", ""); // Remove trailing zeros
-                formatted = formatted.replaceAll("\\.$", ""); // Remove trailing dot
-                return formatted;
-            }
-        }
-    }
-
-    // Add subtle animation to result
-    private void animateResult() {
-        resultTextView.setAlpha(0f);
-        resultTextView.animate()
-                .alpha(1f)
-                .setDuration(300)
-                .start();
-    }
-
-    // Enhanced input validation
-    private boolean validateInputs() {
-        String input1 = number1EditText.getText().toString().trim();
-        String input2 = number2EditText.getText().toString().trim();
-
-        // Clear previous errors
-        number1EditText.setError(null);
-        number2EditText.setError(null);
-
-        if (input1.isEmpty()) {
-            number1EditText.setError("Enter first number");
-            number1EditText.requestFocus();
-            return false;
-        }
-
-        if (input2.isEmpty()) {
-            number2EditText.setError("Enter second number");
-            number2EditText.requestFocus();
-            return false;
-        }
-
-        try {
-            parseDouble(input1);
-        } catch (NumberFormatException e) {
-            number1EditText.setError("Invalid number");
-            number1EditText.requestFocus();
-            return false;
-        }
-
-        try {
-            parseDouble(input2);
-        } catch (NumberFormatException e) {
-            number2EditText.setError("Invalid number");
-            number2EditText.requestFocus();
-            return false;
-        }
-
-        return true;
-    }
-
-    // Helper method to show errors
-    private void showError(String message) {
-        resultTextView.setText("Error: " + message);
-        resultTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
-    }
-
-    // Helper method to show results
-    private void showResult(String message) {
-        resultTextView.setText(message);
-        resultTextView.setTextColor(ContextCompat.getColor(this, android.R.color.black));
-    }
-
-    // Keep original parseInt method for backward compatibility (if needed elsewhere)
     private int parseInt(String str) {
         if (str == null || str.isEmpty()) {
             return 0;
@@ -217,4 +79,5 @@ public class MyCalculator extends AppCompatActivity {
             return 0;
         }
     }
+
 }
